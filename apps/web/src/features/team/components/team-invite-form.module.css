@@ -1,0 +1,87 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fieldsRow {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.input,
+.select {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 65%, transparent);
+  background: color-mix(in srgb, var(--surface) 97%, transparent);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--primary) 70%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+.input:disabled,
+.select:disabled {
+  opacity: 0.6;
+}
+
+.error,
+.info {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 0.85rem;
+  font-size: 0.85rem;
+}
+
+.error {
+  color: #ef4444;
+  border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+}
+
+.info {
+  color: #16a34a;
+  border: 1px solid color-mix(in srgb, #16a34a 35%, transparent);
+  background: color-mix(in srgb, #16a34a 12%, transparent);
+}
+
+.submitButton {
+  align-self: flex-start;
+  border: none;
+  border-radius: 0.85rem;
+  padding: 0.85rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: linear-gradient(120deg, var(--primary), #4338ca);
+  color: var(--primary-foreground);
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

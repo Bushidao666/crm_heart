@@ -1,0 +1,80 @@
+.wrapper {
+  border: 1px solid color-mix(in srgb, var(--outline) 70%, transparent);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 50%, transparent);
+  font-size: 0.95rem;
+}
+
+.table th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted-foreground);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editButton,
+.deleteButton {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editButton {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent);
+}
+
+.deleteButton {
+  background: color-mix(in srgb, #ef4444 18%, transparent);
+  color: #991b1b;
+  border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
+}
+
+.serviceName {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.description {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+

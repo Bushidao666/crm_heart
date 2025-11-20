@@ -1,0 +1,49 @@
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  padding: 2rem;
+}
+
+.card {
+  width: min(420px, 100%);
+  border-radius: 1.25rem;
+  border: 1px solid var(--outline);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+}
+
+.formArea {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.formHelper {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  text-align: center;
+}

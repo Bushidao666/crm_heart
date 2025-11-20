@@ -1,0 +1,75 @@
+.wrapper {
+  border: 1px solid color-mix(in srgb, var(--outline) 70%, transparent);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 50%, transparent);
+  font-size: 0.95rem;
+}
+
+.table th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted-foreground);
+}
+
+.clientInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.clientMeta {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.clientCpf {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.downloadButton {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(120deg, var(--primary), #4338ca);
+  color: var(--primary-foreground);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.downloadButton:disabled,
+.downloadButtonDisabled {
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--muted-foreground) 18%, transparent);
+  color: color-mix(in srgb, var(--muted-foreground) 65%, white 35%);
+  opacity: 0.9;
+  transform: none;
+}

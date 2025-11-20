@@ -1,0 +1,89 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.searchWrapper {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.searchInput {
+  padding: 0.8rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent);
+  background: var(--surface);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--primary) 70%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.presetButton {
+  border: 1px solid color-mix(in srgb, var(--outline) 70%, transparent);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.presetButton:hover {
+  border-color: color-mix(in srgb, var(--primary) 60%, transparent);
+  color: var(--primary);
+}
+
+.presetButtonActive {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.customDates {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.dateInput {
+  margin-top: 0.35rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent);
+}
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customDates {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

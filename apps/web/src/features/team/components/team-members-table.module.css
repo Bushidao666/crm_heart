@@ -1,0 +1,226 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: var(--muted-foreground);
+}
+
+.refreshButton {
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1.25rem;
+  font-weight: 600;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 0.85rem;
+  font-size: 0.85rem;
+  color: #ef4444;
+  border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+}
+
+.info {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 0.85rem;
+  font-size: 0.85rem;
+  color: #16a34a;
+  border: 1px solid color-mix(in srgb, #16a34a 35%, transparent);
+  background: color-mix(in srgb, #16a34a 12%, transparent);
+}
+
+.tableWrapper {
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 70%, transparent);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 1.15rem 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline) 45%, transparent);
+  font-size: 0.9rem;
+}
+
+.table th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.emptyMessage {
+  text-align: center;
+  padding: 2.5rem 1.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+}
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.avatarPlaceholder {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 600;
+}
+
+.userEmail {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  background: color-mix(in srgb, var(--muted) 35%, transparent);
+  color: var(--foreground);
+}
+
+.statusDefault {
+  background: color-mix(in srgb, var(--muted) 35%, transparent);
+  color: var(--foreground);
+}
+
+.statusOnline {
+  background: color-mix(in srgb, #22c55e 20%, transparent);
+  color: #166534;
+}
+
+.statusOffline {
+  background: color-mix(in srgb, #f97316 20%, transparent);
+  color: #9a3412;
+}
+
+.statusBlacklisted {
+  background: color-mix(in srgb, #ef4444 20%, transparent);
+  color: #991b1b;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.actionButton,
+.dangerButton,
+.restoreButton {
+  border: none;
+  padding: 0.55rem 0.95rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.actionButton {
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline) 55%, transparent);
+}
+
+.dangerButton {
+  background: color-mix(in srgb, #ef4444 20%, transparent);
+  color: #991b1b;
+  border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
+}
+
+.restoreButton {
+  background: color-mix(in srgb, #22c55e 25%, transparent);
+  color: #14532d;
+  border: 1px solid color-mix(in srgb, #22c55e 45%, transparent);
+}
+
+.actionButton:disabled,
+.dangerButton:disabled,
+.restoreButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .table th,
+  .table td {
+    padding: 0.85rem;
+  }
+}

@@ -1,0 +1,71 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #991b1b;
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline) 70%, transparent);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  gap: 1rem;
+}
+
+.fileName {
+  font-size: 0.85rem;
+  color: var(--foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.link {
+  font-size: 0.85rem;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.removeButton {
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  text-decoration: underline;
+}
+

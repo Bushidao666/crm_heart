@@ -1,0 +1,67 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.input {
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 70%, transparent);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--primary) 70%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.input:disabled {
+  opacity: 0.6;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  padding: 0.75rem 1rem;
+  color: #ef4444;
+  background: color-mix(in srgb, #ef4444 10%, transparent);
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
+}
+
+.submitButton {
+  border: none;
+  border-radius: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: linear-gradient(120deg, var(--primary), #4338ca);
+  color: var(--primary-foreground);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

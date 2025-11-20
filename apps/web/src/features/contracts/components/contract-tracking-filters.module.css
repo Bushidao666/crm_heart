@@ -1,0 +1,27 @@
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.filterGroup select,
+.filterGroup input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent);
+  background: color-mix(in srgb, var(--surface) 98%, transparent);
+}
+

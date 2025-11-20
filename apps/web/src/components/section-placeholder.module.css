@@ -1,0 +1,35 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  border: 1px dashed color-mix(in srgb, var(--outline) 70%, transparent);
+  border-radius: 1.25rem;
+  padding: 3rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  color: var(--muted-foreground);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--foreground);
+}
+
+.description {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.helper {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}

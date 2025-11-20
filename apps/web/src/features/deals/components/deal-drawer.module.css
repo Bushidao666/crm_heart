@@ -1,0 +1,785 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 120;
+}
+
+.drawer {
+  width: min(540px, 100%);
+  height: 100%;
+  background: var(--surface);
+  border-left: 1px solid color-mix(in srgb, var(--outline) 70%, transparent);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+}
+
+.closeButton {
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--muted-foreground);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.gridTwo {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.contractGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  align-items: start;
+}
+
+.contractStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.contractStatusBadge {
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 0.4rem 0.95rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+}
+
+.contractStatusBadgeMuted {
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  color: var(--muted-foreground);
+  border-color: color-mix(in srgb, var(--outline) 45%, transparent);
+}
+
+.contractStatusBadgeInfo {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+.contractStatusBadgeSuccess {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.contractStatusBadgeDanger {
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+.contractStatusReason {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.contractStatusReasonText {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--foreground);
+  line-height: 1.4;
+}
+
+.contractCallout,
+.contractPreview {
+  grid-column: 1 / -1;
+}
+
+.contractPreview {
+  margin-top: 0;
+}
+
+.contractPreviewError {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.previewActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.previewGenerateButton {
+  border: 1px solid color-mix(in srgb, var(--outline) 65%, transparent);
+  background: color-mix(in srgb, var(--surface) 97%, transparent);
+  color: #111827;
+  border-radius: 999px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.previewGenerateButton:hover {
+  filter: brightness(0.97);
+}
+
+.previewGenerateButton:disabled,
+.previewOpenButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.signatureActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.gridThree {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.field input,
+.field select {
+  padding: 0.75rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent);
+  background: color-mix(in srgb, var(--surface) 98%, transparent);
+  font-size: 0.95rem;
+}
+
+.fieldHidden {
+  display: none !important;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  border-radius: 999px;
+  padding: 0.75rem 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.primaryButton {
+  background: linear-gradient(120deg, var(--primary), #4338ca);
+  color: var(--primary-foreground);
+}
+
+.secondaryButton {
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline) 70%, transparent);
+}
+
+.error {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #991b1b;
+}
+
+.previewBox {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 45%, transparent);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 32px 55px -40px rgba(15, 23, 42, 0.45);
+}
+
+.previewHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.previewOpenButton {
+  border: none;
+  background: linear-gradient(120deg, var(--primary), #4338ca);
+  color: var(--primary-foreground);
+  border-radius: 999px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.previewOpenButton:hover {
+  filter: brightness(1.05);
+}
+
+.previewHint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.previewLabel {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.previewTitle {
+  margin: 0.25rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.previewDocument {
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 40px 70px -50px rgba(15, 23, 42, 0.35);
+  padding: 2.5rem 2.75rem;
+  max-height: 520px;
+  overflow-y: auto;
+  color: #1f2937;
+  line-height: 1.7;
+  font-size: 0.97rem;
+}
+
+.previewDocument p {
+  margin: 0 0 1rem;
+}
+
+
+.signatureDesignerCallout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding: 1.2rem 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 50%, transparent);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+}
+
+.designerBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 2rem);
+  z-index: 200;
+}
+
+.designerContainer {
+  display: flex;
+  gap: 1.5rem;
+  width: min(1200px, 96vw);
+  height: min(90vh, 780px);
+  background: var(--surface);
+  border-radius: 1.5rem;
+  box-shadow: 0 40px 80px -45px rgba(15, 23, 42, 0.55);
+  overflow: hidden;
+}
+
+.designerSidebar {
+  width: clamp(280px, 28vw, 340px);
+  background: color-mix(in srgb, var(--surface) 98%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--outline) 45%, transparent);
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+}
+
+.designerSidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.designerSidebarTitle {
+  margin: 0.35rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.designerCloseButton {
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.designerOrderToggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.designerToggleButton {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--outline) 45%, transparent);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.designerToggleButtonActive {
+  background: linear-gradient(120deg, var(--primary), #4338ca);
+  color: var(--primary-foreground);
+  border-color: transparent;
+}
+
+.addSignerButton {
+  border: 1px dashed color-mix(in srgb, var(--outline) 50%, transparent);
+  background: color-mix(in srgb, var(--surface) 98%, transparent);
+  padding: 0.65rem 1rem;
+  border-radius: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.addSignerButton:hover {
+  background: color-mix(in srgb, var(--surface) 99%, var(--primary) 7%);
+}
+
+.signersList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.signerCard {
+  border-radius: 1rem;
+  border: 1px solid var(--participant-border, color-mix(in srgb, var(--outline) 35%, transparent));
+  background: var(--participant-background, color-mix(in srgb, var(--surface) 99%, transparent));
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.signerCardActive {
+  border-color: var(--participant-border, color-mix(in srgb, var(--primary) 60%, transparent));
+  box-shadow: var(--participant-shadow, 0 16px 30px -24px rgba(67, 56, 202, 0.8));
+  transform: translateY(-1px);
+}
+
+.signerCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.signerCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.signerIndex {
+  font-weight: 600;
+  color: var(--participant-badge-color, inherit);
+}
+
+.signerRoleBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--participant-border, color-mix(in srgb, var(--outline) 40%, transparent));
+  background: var(--participant-badge-bg, color-mix(in srgb, var(--primary) 12%, transparent));
+  color: var(--participant-badge-color, color-mix(in srgb, var(--primary) 75%, #312e81 25%));
+}
+
+.signerRoleBadgeSigner {}
+
+.signerRoleBadgeWitness {}
+
+.removeSignerButton {
+  border: none;
+  background: transparent;
+  color: #dc2626;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fieldPalette {
+  border-top: 1px solid color-mix(in srgb, var(--outline) 35%, transparent);
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fieldPaletteButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.fieldPaletteButton {
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 45%, transparent);
+  background: color-mix(in srgb, var(--surface) 98%, transparent);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.fieldPaletteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.fieldPaletteButtonActive {
+  background: linear-gradient(120deg, var(--primary), #4338ca);
+  color: var(--primary-foreground);
+  border-color: transparent;
+}
+
+.designerPreviewColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem 1.5rem;
+  gap: 1.25rem;
+  overflow: hidden;
+}
+
+.designerFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.designerPreviewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.designerPreviewSurface {
+  position: relative;
+  flex: 1;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  overflow: auto;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.designerPreviewSurfacePending {
+  cursor: crosshair;
+}
+
+.designerPreviewDocumentWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.designerPreviewDocument {
+  min-height: 100%;
+  color: #1f2937;
+}
+
+.designerPreviewDocument :global(p) {
+  margin: 0 0 1rem;
+}
+
+.signatureFieldTag {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: var(--participant-background, rgba(67, 56, 202, 0.12));
+  border: 1px solid var(--participant-border, rgba(67, 56, 202, 0.55));
+  border-radius: 0.75rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--participant-badge-color, #312e81);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: grab;
+  pointer-events: auto;
+  user-select: none;
+  touch-action: none;
+  z-index: 2;
+}
+
+.signatureFieldTagActive {
+  background: color-mix(in srgb, var(--participant-background, rgba(37, 99, 235, 0.15)) 65%, white 35%);
+  border-color: var(--participant-border, rgba(37, 99, 235, 0.65));
+  color: var(--participant-badge-color, #1d4ed8);
+}
+
+.signatureFieldRemove {
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #ef4444;
+}
+
+.designerFieldsList {
+  border-top: 1px solid color-mix(in srgb, var(--outline) 35%, transparent);
+  padding-top: 1rem;
+}
+
+.designerFieldsTable {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.designerFieldsTableHeader,
+.designerFieldsTableRow {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) repeat(3, minmax(0, 90px)) minmax(0, 90px);
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.designerFieldsTableHeader {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.designerFieldsTableRow {
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 30%, transparent);
+  background: color-mix(in srgb, var(--surface) 98%, transparent);
+}
+
+.designerFieldName {
+  font-weight: 600;
+}
+
+.designerFieldsTableRow input {
+  width: 100%;
+  border-radius: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.designerFieldRemoveButton {
+  border: none;
+  border-radius: 0.6rem;
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.previewDocument h1,
+.previewDocument h2,
+.previewDocument h3,
+.previewDocument h4 {
+  margin: 1.5rem 0 0.75rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.previewDocument h1 {
+  font-size: 1.6rem;
+}
+
+.previewDocument h2 {
+  font-size: 1.4rem;
+}
+
+.previewDocument h3 {
+  font-size: 1.2rem;
+}
+
+.previewDocument ul,
+.previewDocument ol {
+  margin: 0 0 1rem 1.5rem;
+  padding: 0;
+}
+
+.previewDocument li {
+  margin-bottom: 0.5rem;
+}
+
+.previewDocument strong {
+  font-weight: 600;
+}
+
+.previewDocument em {
+  font-style: italic;
+}
+
+.previewDocument :global(.docx) {
+  font-family: 'Times New Roman', Georgia, serif;
+  color: inherit;
+  line-height: 1.7;
+}
+
+.previewDocument :global(.docx table) {
+  width: 100% !important;
+  border-collapse: collapse;
+}
+
+.previewDocument :global(.docx table td),
+.previewDocument :global(.docx table th) {
+  border: 1px solid #d1d5db;
+  padding: 0.5rem;
+}
+
+.previewDocument :global(.docx h1),
+.previewDocument :global(.docx h2),
+.previewDocument :global(.docx h3),
+.previewDocument :global(.docx h4) {
+  text-align: center !important;
+}
+
+.previewDocument :global(.crm-highlighted-value) {
+  color: #b91c1c;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.12);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.previewDocument :global(.crm-highlighted-value--missing) {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px dashed rgba(239, 68, 68, 0.5);
+}
+
+.previewModalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  z-index: 130;
+  backdrop-filter: blur(4px);
+}
+
+.previewModal {
+  width: min(920px, 100%);
+  max-height: min(90vh, 900px);
+  background: #f9fafb;
+  border-radius: 1.5rem;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 50px 90px -40px rgba(15, 23, 42, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.previewModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.previewCloseButton {
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+  color: #4b5563;
+  transition: color 0.2s ease;
+}
+
+.previewCloseButton:hover {
+  color: #111827;
+}
+
+.previewModal .previewDocument {
+  max-height: none;
+  height: min(70vh, 720px);
+}

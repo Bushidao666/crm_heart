@@ -1,0 +1,153 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 55%, transparent);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.createdAt {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.updatedAt {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--muted-foreground) 85%, transparent);
+}
+
+.detailLine {
+  margin: 0;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 0.35rem;
+}
+
+.label {
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.value {
+  color: var(--foreground);
+}
+
+.contractStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.1rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+  min-height: 1.6rem;
+}
+
+.contractStatusBadgeMuted {
+  background: color-mix(in srgb, #f1f5f9 96%, transparent);
+  color: #475569;
+  border-color: color-mix(in srgb, #cbd5f5 45%, transparent);
+}
+
+.contractStatusBadgeInfo {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+.contractStatusBadgeSuccess {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.contractStatusBadgeDanger {
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+.contractRejectionReason {
+  margin: 0;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.rejectionReasonText {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.attachments {
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--outline) 45%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.attachmentsTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.attachmentsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.attachmentLine {
+  display: flex;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
