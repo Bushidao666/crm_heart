@@ -42,6 +42,27 @@
   gap: 0.5rem;
 }
 
+.activateButton,
+.deactivateButton {
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.activateButton {
+  background: color-mix(in srgb, #10b981 16%, transparent);
+  color: #064e3b;
+  border-color: color-mix(in srgb, #10b981 40%, transparent);
+}
+
+.deactivateButton {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border-color: color-mix(in srgb, var(--outline) 60%, transparent);
+}
+
 .editButton,
 .deleteButton {
   border: none;
@@ -62,4 +83,3 @@
   color: #991b1b;
   border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
 }
-

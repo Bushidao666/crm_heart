@@ -15,7 +15,7 @@ import {
 import { useCompany } from '@/app/providers/use-company'
 import { heartSupabase, supabase } from '@/lib/supabase-client'
 import { DEAL_DRAFT_STORAGE_PREFIX } from '@/features/deals/constants'
-import { useToast } from '@/app/providers/toast-provider'
+import { useToast } from '@/app/providers/use-toast'
 
 import styles from './deal-drawer.module.css'
 
@@ -474,7 +474,7 @@ export const DealDrawer = ({ deal, open, onClose, onSave }: DealDrawerProps) => 
   const designerPreviewRef = useRef<HTMLDivElement | null>(null)
   const designerDocumentWrapperRef = useRef<HTMLDivElement | null>(null)
   const designerDocumentRef = useRef<HTMLDivElement | null>(null)
-  const [pageRects, setPageRects] = useState<Array<{ page: number; top: number; bottom: number; left: number; width: number; height: number }>>([])
+  const [, setPageRects] = useState<Array<{ page: number; top: number; bottom: number; left: number; width: number; height: number }>>([])
   const draftStorageKey = typeof window !== 'undefined' && deal ? `${DEAL_DRAFT_STORAGE_PREFIX}:${deal.id}` : null
   const toast = useToast()
   const { companyId } = useCompany()
@@ -765,7 +765,7 @@ export const DealDrawer = ({ deal, open, onClose, onSave }: DealDrawerProps) => 
     }
 
     void fetchLeadAndContract()
-  }, [deal, draftStorageKey, companyId, convertPreviewToHtml, normalizeFormState])
+  }, [deal, draftStorageKey, companyId, convertPreviewToHtml, normalizeFormState, setShareLinksBySigner])
 
   useEffect(() => {
     if (!deal || !draftStorageKey) return
@@ -863,7 +863,7 @@ export const DealDrawer = ({ deal, open, onClose, onSave }: DealDrawerProps) => 
     return () => {
       active = false
     }
-  }, [form.deal_estado])
+  }, [form.deal_estado, form.deal_cidade])
 
 const participantCounts = useMemo(() => {
     let signerTotal = 0
@@ -1127,31 +1127,6 @@ const participantCounts = useMemo(() => {
       .filter((rect) => rect.height > 1 && Number.isFinite(rect.height) && Number.isFinite(rect.top))
 
     setPageRects(rects)
-  }, [])
-
-  const getDocumentMetrics = useCallback(() => {
-    const surface = designerPreviewRef.current
-    const documentWrapper = designerDocumentWrapperRef.current
-    const documentNode = designerDocumentRef.current
-    if (!surface || !documentWrapper || !documentNode) return null
-
-    const surfaceRect = surface.getBoundingClientRect()
-    const docRect = documentNode.getBoundingClientRect()
-
-    const width = documentNode.scrollWidth || documentNode.clientWidth || documentWrapper.clientWidth || surfaceRect.width
-    const height = documentNode.scrollHeight || documentWrapper.scrollHeight || surfaceRect.height
-
-    return {
-      surface,
-      documentWrapper,
-      documentNode,
-      surfaceRect,
-      docRect,
-      scrollLeft: surface.scrollLeft,
-      scrollTop: surface.scrollTop,
-      width: width || 1,
-      height: height || 1,
-    }
   }, [])
 
   const handleCloseDesigner = () => {
@@ -1929,7 +1904,8 @@ const participantCounts = useMemo(() => {
         throw new Error('Não foi possível salvar os dados do negócio antes de enviar o contrato.')
       }
 
-      const { id: _persistedId, ...dealSnapshot } = payloadWithStatus
+      const dealSnapshot = { ...payloadWithStatus }
+      delete (dealSnapshot as { id?: string }).id
 
       console.debug('[DealDrawer] Prepared signers payload', {
         dealId: deal?.id,

@@ -16,6 +16,7 @@ type LeadsColumnProps = {
   highlight?: string
   onLeadClick?: (lead: LeadRecord) => void
   onLeadContextMenu?: (lead: LeadRecord, position: { x: number; y: number }) => void
+  renderOwnerLabel?: (lead: LeadRecord) => string | null
 }
 
 export const LeadsColumn = ({
@@ -29,6 +30,7 @@ export const LeadsColumn = ({
   highlight,
   onLeadClick,
   onLeadContextMenu,
+  renderOwnerLabel,
 }: LeadsColumnProps) => {
   const handlePageChange = (page: number) => {
     if (page === currentPage) return
@@ -64,7 +66,12 @@ export const LeadsColumn = ({
                       onLeadContextMenu?.(lead, { x: event.clientX, y: event.clientY })
                     }}
                   >
-                    <LeadCard lead={lead} highlight={highlight} onClick={onLeadClick} />
+                    <LeadCard
+                      lead={lead}
+                      highlight={highlight}
+                      onClick={onLeadClick}
+                      ownerLabel={renderOwnerLabel?.(lead) ?? null}
+                    />
                   </div>
                 )}
               </Draggable>

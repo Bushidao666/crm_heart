@@ -148,6 +148,17 @@ export const useContractTemplatesAdmin = () => {
     [fetchTemplates],
   )
 
+  const toggleTemplateStatus = useCallback(async (id: string, active: boolean) => {
+    const { error } = await coreSupabase.from('contract_templates').update({ active }).eq('id', id)
+
+    if (error) {
+      console.error('Failed to toggle contract template status', error)
+      throw new Error('Não foi possível atualizar o status do template.')
+    }
+
+    setTemplates((current) => current.map((template) => (template.id === id ? { ...template, ativo: active } : template)))
+  }, [])
+
   const deleteTemplate = useCallback(
     async (id: string) => {
       const { error } = await coreSupabase.from('contract_templates').delete().eq('id', id)
@@ -169,5 +180,6 @@ export const useContractTemplatesAdmin = () => {
     saveTemplate,
     deleteTemplate,
     refresh: fetchTemplates,
+    toggleTemplateStatus,
   }
 }

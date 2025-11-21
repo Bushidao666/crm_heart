@@ -12,15 +12,28 @@ export class GeolocationController {
   @Post('collect')
   @UseGuards(SupabaseAuthGuard)
   async collect(@AuthUser() user: SupabaseAuthUser, @Req() request: Request) {
-    const forwarded = request.headers['x-forwarded-for']
-    const ip =
-      (Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(',')[0])?.trim() ||
-      request.socket.remoteAddress ||
-      null
+    const ip = this.extractClientIp(request)
     const userAgent = request.headers['user-agent'] ?? null
 
     await this.geolocationService.collect(user.id, ip, userAgent)
 
     return { success: true }
+  }
+
+  private extractClientIp(request: Request) {
+    const headerCandidates = ['x-forwarded-for', 'cf-connecting-ip', 'x-real-ip', 'x-client-ip'] as const
+
+    for (const header of headerCandidates) {
+      const value = request.headers[header]
+      if (!value) continue
+
+      const parsed = Array.isArray(value) ? value[0] : value.split(',')[0]
+      const trimmed = parsed?.trim()
+      if (trimmed) {
+        return trimmed
+      }
+    }
+
+    return request.socket.remoteAddress || null
   }
 }

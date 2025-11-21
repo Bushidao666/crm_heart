@@ -36,7 +36,7 @@ export const useTeamManagement = () => {
     try {
       const { data, error: queryError } = await heartSupabase
         .from('equipe')
-        .select(`id, user_name, user_email, role, status, last_activity, metadata, created_at, updated_at`)
+        .select(`id, user_name, user_email, role, status, last_activity, metadata, last_session, created_at, updated_at`)
         .order('created_at', { ascending: false })
 
       if (queryError) {
@@ -258,6 +258,7 @@ export const useTeamManagement = () => {
       isInviting,
       isBlacklisting,
       isDeleting,
+      isRestoring,
       error,
       inviteMessage,
       actionMessage,

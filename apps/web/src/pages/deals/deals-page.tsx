@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
 
 import { useAuth } from '@/features/auth/hooks/use-auth'
+import { useCompany } from '@/app/providers/use-company'
 import { DealFilters } from '@/features/deals/components/deal-filters'
 import { DealDrawer } from '@/features/deals/components/deal-drawer'
 import { DealsColumn } from '@/features/deals/components/deals-column'
@@ -11,6 +12,7 @@ import { DEAL_DRAWER_STORAGE_KEY, DEAL_DRAFT_STORAGE_PREFIX } from '@/features/d
 import { KANBAN_PAGE_SIZE } from '@/constants/kanban'
 import { getDateRangeForPreset, type DatePreset } from '@/features/leads/utils/date-presets'
 import { ADMIN_ROLES } from '@/features/auth/constants'
+import { heartSupabase } from '@/lib/supabase-client'
 
 import styles from './deals-page.module.css'
 
@@ -46,7 +48,8 @@ const getDealDisplayName = (deal: DealRecord) => {
 }
 
 export const DealsPage = () => {
-  const { user, profile, hasRole } = useAuth()
+  const { user, hasRole } = useAuth()
+  const { companyId } = useCompany()
   const isAdmin = hasRole(ADMIN_ROLES)
   const { dealsByStatus, fetchDeals, updateDealStatus, upsertDeal, createDeal, deleteDeal, isLoading, error } =
     useDealsKanban()
@@ -60,6 +63,9 @@ export const DealsPage = () => {
   const [isCreatingDeal, setIsCreatingDeal] = useState(false)
   const [dealPendingDeletion, setDealPendingDeletion] = useState<DealRecord | null>(null)
   const [isDeletingDeal, setIsDeletingDeal] = useState(false)
+  const [dealOwnersMap, setDealOwnersMap] = useState<Record<string, string>>({})
+  const [sellerFilterOptions, setSellerFilterOptions] = useState<{ value: string; label: string }[]>([])
+  const [selectedSellerFilter, setSelectedSellerFilter] = useState('')
 
   const allDeals = useMemo(() => {
     return COLUMNS.flatMap((status) => dealsByStatus[status] ?? [])
@@ -106,14 +112,16 @@ export const DealsPage = () => {
     }
   }, [])
 
+  const activeOwnerFilter = isAdmin ? selectedSellerFilter || null : undefined
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setColumnPages(createInitialPages())
-      void fetchDeals({ searchTerm, dateRange: resolvedDateRange })
+      void fetchDeals({ searchTerm, dateRange: resolvedDateRange, ownerId: activeOwnerFilter })
     }, 300)
 
     return () => clearTimeout(handler)
-  }, [searchTerm, resolvedDateRange, fetchDeals])
+  }, [searchTerm, resolvedDateRange, fetchDeals, activeOwnerFilter])
 
   useEffect(() => {
     setColumnPages((previous) => {
@@ -132,9 +140,51 @@ export const DealsPage = () => {
         }
       }
 
-      return hasChanges ? nextState : previous
-    })
+    return hasChanges ? nextState : previous
+  })
   }, [dealsByStatus])
+
+  useEffect(() => {
+    if (!isAdmin || !companyId) {
+      setDealOwnersMap({})
+      setSellerFilterOptions([])
+      return
+    }
+
+    let isMounted = true
+
+    heartSupabase
+      .from('crm_user_profiles')
+      .select('id, user_id, user_name, user_email')
+      .eq('company_id', companyId)
+      .eq('role', 'vendedor')
+      .then(({ data, error }) => {
+        if (!isMounted) return
+        if (error) {
+          console.error('Failed to load deal owners map', error)
+          setDealOwnersMap({})
+          return
+        }
+
+        const map: Record<string, string> = {}
+        const options: { value: string; label: string }[] = []
+        data?.forEach((member) => {
+          const key = member.user_id ?? member.id
+          if (key) {
+            const label = member.user_name ?? member.user_email ?? key
+            map[key] = label
+            options.push({ value: key, label })
+          }
+        })
+
+        setDealOwnersMap(map)
+        setSellerFilterOptions(options)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [companyId, isAdmin])
 
   const paginatedColumns = useMemo(() => {
     return COLUMNS.reduce<Record<DealStatus, { total: number; pageCount: number; currentPage: number; deals: DealRecord[] }>>(
@@ -172,6 +222,18 @@ export const DealsPage = () => {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [contextMenu])
+
+  useEffect(() => {
+    if (!isAdmin) {
+      setSelectedSellerFilter('')
+      return
+    }
+
+    const hasOption = sellerFilterOptions.some((option) => option.value === selectedSellerFilter)
+    if (!hasOption) {
+      setSelectedSellerFilter('')
+    }
+  }, [isAdmin, sellerFilterOptions, selectedSellerFilter])
 
   const handleDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result
@@ -279,6 +341,15 @@ export const DealsPage = () => {
     }
   }, [dealPendingDeletion, deleteDeal, isAdmin])
 
+  const renderDealOwnerLabel = useCallback(
+    (deal: DealRecord) => {
+      if (!isAdmin) return null
+      if (!deal.vendedor_responsavel) return null
+      return dealOwnersMap[deal.vendedor_responsavel] ?? null
+    },
+    [dealOwnersMap, isAdmin],
+  )
+
   const handleCardClick = (deal: DealRecord) => {
     openDeal(deal)
   }
@@ -297,7 +368,7 @@ export const DealsPage = () => {
     const shouldCreate = isCreatingDeal || !dealExists
 
     if (shouldCreate) {
-      const sellerId = profile?.id ?? user?.id ?? null
+      const sellerId = user?.id ?? null
 
       if (!sellerId) {
         throw new Error('Não foi possível identificar o vendedor responsável para criar o negócio.')
@@ -379,7 +450,7 @@ export const DealsPage = () => {
     const newDeal: Partial<DealRecord> & { id: string } = {
       id: generateId(),
       deal_status: 'negocio_novo',
-      vendedor_responsavel: profile?.id ?? user?.id ?? null,
+      vendedor_responsavel: user?.id ?? null,
     }
 
     openDeal(newDeal, { isNew: true })
@@ -411,6 +482,9 @@ export const DealsPage = () => {
         onPresetChange={handlePresetChange}
         customRange={customRange}
         onCustomRangeChange={handleCustomRangeChange}
+        ownerOptions={isAdmin ? sellerFilterOptions : undefined}
+        ownerValue={selectedSellerFilter}
+        onOwnerChange={isAdmin ? setSelectedSellerFilter : undefined}
       />
 
       {error ? <p className={styles.error}>{error}</p> : null}
@@ -443,6 +517,7 @@ export const DealsPage = () => {
               }
               onDealContextMenu={handleDealContextMenu}
               onCardClick={handleCardClick}
+              renderOwnerLabel={renderDealOwnerLabel}
             />
           ))}
         </div>

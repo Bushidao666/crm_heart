@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { useCompany } from '@/app/providers/use-company'
-import { coreSupabase, heartSupabase } from '@/lib/supabase-client'
+import { heartSupabase } from '@/lib/supabase-client'
 import type { ContractTemplateRecord, ServiceRecord } from '@/features/services/types'
 
 export const useServicesAdmin = () => {

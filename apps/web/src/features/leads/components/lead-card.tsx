@@ -6,6 +6,7 @@ type LeadCardProps = {
   lead: LeadRecord
   onClick?: (lead: LeadRecord) => void
   highlight?: string
+  ownerLabel?: string | null
 }
 
 const highlightTerm = (text: string | null, term?: string) => {
@@ -46,7 +47,7 @@ const getDateTimeInfo = (value: string | null) => {
   }
 }
 
-export const LeadCard = ({ lead, onClick, highlight }: LeadCardProps) => {
+export const LeadCard = ({ lead, onClick, highlight, ownerLabel }: LeadCardProps) => {
   const createdAt = getDateTimeInfo(lead.created_at)
   const updatedAt = getDateTimeInfo(lead.updated_at)
   const shouldShowUpdatedAt = Boolean(
@@ -56,7 +57,14 @@ export const LeadCard = ({ lead, onClick, highlight }: LeadCardProps) => {
   return (
     <article className={styles.card} onClick={() => (onClick ? onClick(lead) : undefined)}>
       <header className={styles.header}>
-        <h3 className={styles.title}>{highlightTerm(`${lead.lead_first_name ?? ''} ${lead.lead_last_name ?? ''}`.trim(), highlight)}</h3>
+        <div className={styles.headerInfo}>
+          <div className={styles.headerDetails}>
+            <h3 className={styles.title}>
+              {highlightTerm(`${lead.lead_first_name ?? ''} ${lead.lead_last_name ?? ''}`.trim(), highlight)}
+            </h3>
+            {ownerLabel ? <span className={styles.ownerBadge}>{ownerLabel}</span> : null}
+          </div>
+        </div>
         <div className={styles.timestamps}>
           <span className={styles.createdAt}>{createdAt?.label ?? '—'}</span>
           {shouldShowUpdatedAt && updatedAt ? (

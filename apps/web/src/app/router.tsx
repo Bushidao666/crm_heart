@@ -14,7 +14,7 @@ import { CpfPage } from '@/pages/cpf'
 import { LoginPage } from '@/pages/auth/login-page'
 import { ForbiddenPage } from '@/pages/auth/forbidden-page'
 import { AccessRevokedPage } from '@/pages/auth/access-revoked-page'
-import { ADMIN_ROLES } from '@/features/auth/constants'
+import { ADMIN_ROLES, METRICS_ROLES } from '@/features/auth/constants'
 
 export const router = createBrowserRouter([
   {
@@ -72,7 +72,7 @@ export const router = createBrowserRouter([
       {
         path: 'metrics',
         element: (
-          <ProtectedRoute allowRoles={ADMIN_ROLES}>
+          <ProtectedRoute allowRoles={METRICS_ROLES}>
             <MetricsPage />
           </ProtectedRoute>
         ),

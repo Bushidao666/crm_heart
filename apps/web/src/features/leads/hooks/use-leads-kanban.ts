@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useCompany } from '@/app/providers/use-company'
+import { useAuth } from '@/features/auth/hooks/use-auth'
 import { heartSupabase, supabase } from '@/lib/supabase-client'
+import { env } from '@/config/env'
 import type { LeadRecord, LeadStatus } from '@/features/leads/types'
 
 export type LeadsByStatus = Record<LeadStatus, LeadRecord[]>
@@ -17,14 +19,28 @@ type FetchOpts = {
   searchTerm?: string
   startDate?: string | null
   endDate?: string | null
+  ownerId?: string | null
 }
 
-const buildQuery = (companyId: string, { searchTerm, startDate, endDate }: FetchOpts) => {
+const buildQuery = (
+  filters: { companyId?: string | null; ownerId?: string | null },
+  { searchTerm, startDate, endDate, ownerId }: FetchOpts,
+) => {
   let query = heartSupabase
     .from('leads_captura')
     .select('*')
-    .eq('company_id', companyId)
     .order('created_at', { ascending: false })
+
+  if (filters.companyId) {
+    query = query.eq('company_id', filters.companyId)
+  } else if (filters.ownerId) {
+    query = query.eq('vendedor_responsavel', filters.ownerId)
+  }
+
+  const effectiveOwnerId = ownerId ?? filters.ownerId
+  if (effectiveOwnerId) {
+    query = query.eq('vendedor_responsavel', effectiveOwnerId)
+  }
 
   if (searchTerm) {
     const term = searchTerm.trim()
@@ -56,13 +72,69 @@ export const useLeadsKanban = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { companyId, isLoading: isCompanyLoading, error: companyError } = useCompany()
+  const { user } = useAuth()
+  const userId = user?.id ?? null
+  const apiBaseUrl = env.apiUrl?.trim() ?? ''
+
+  const requestLeadsApi = useCallback(
+    async (path: string, payload: Record<string, unknown>) => {
+      if (!apiBaseUrl) {
+        throw new Error('Backend API URL não configurada.')
+      }
+
+      const token = await supabase.auth
+        .getSession()
+        .then(({ data }) => data.session?.access_token)
+        .catch(() => null)
+
+      if (!token) {
+        throw new Error('Sessão inválida. Faça login novamente.')
+      }
+
+      const endpoint = `${apiBaseUrl.replace(/\/$/, '')}${path}`
+      console.log('[requestLeadsApi] calling', endpoint, 'payload:', payload)
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      console.log('[requestLeadsApi] status', response.status, 'for', endpoint)
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Seu acesso foi revogado. Faça login novamente.')
+      }
+
+      if (!response.ok) {
+        const payloadText = await response.text().catch(() => null)
+        console.error('[requestLeadsApi] backend error body:', payloadText)
+        throw new Error(payloadText || 'Falha ao processar solicitação.')
+      }
+
+      const parsed = await response
+        .json()
+        .then((body) => body)
+        .catch(() => null)
+
+      if (!parsed) {
+        throw new Error('Resposta inválida do backend.')
+      }
+
+      return parsed
+    },
+    [apiBaseUrl],
+  )
 
   const fetchLeads = useCallback(
     async (options: FetchOpts = {}) => {
       setIsLoading(true)
       setError(null)
 
-      if (!companyId) {
+      const fallbackOwnerId = !companyId ? userId : null
+
+      if (!companyId && !fallbackOwnerId) {
         if (!isCompanyLoading) {
           setError(companyError ?? 'Sua conta não está vinculada a nenhuma empresa.')
         }
@@ -71,7 +143,13 @@ export const useLeadsKanban = () => {
         return
       }
 
-      const query = buildQuery(companyId, options)
+      const query = buildQuery(
+        {
+          companyId: companyId ?? null,
+          ownerId: fallbackOwnerId,
+        },
+        options,
+      )
       const { data, error: fetchError } = await query
 
       if (fetchError) {
@@ -84,7 +162,7 @@ export const useLeadsKanban = () => {
 
       setIsLoading(false)
     },
-    [companyId, companyError, isCompanyLoading],
+    [companyId, companyError, isCompanyLoading, userId],
   )
 
   const updateLeadStatus = useCallback(
@@ -168,6 +246,7 @@ export const useLeadsKanban = () => {
         lead_email: email?.trim() || null,
         lead_phone: phone?.trim() || null,
         lead_status: 'lead_novo' as LeadStatus,
+        vendedor_responsavel: userId,
       }
 
       const { data, error: insertError } = await heartSupabase
@@ -184,7 +263,49 @@ export const useLeadsKanban = () => {
       setLeads((current) => [data as LeadRecord, ...current])
       return data as LeadRecord
     },
-    [companyId],
+    [companyId, userId],
+  )
+
+  const transferLeadOwner = useCallback(
+    async (leadId: string, _targetCompanyId: string | null, newOwnerId: string) => {
+      void _targetCompanyId
+      const usingBackend = Boolean(apiBaseUrl)
+
+      console.log('[transferLeadOwner] VITE_API_URL =', apiBaseUrl || '(não configurada)')
+      console.log('[transferLeadOwner] usingBackend =', usingBackend)
+
+      if (!usingBackend) {
+        console.error('[transferLeadOwner] API do backend indisponível. Operação bloqueada.')
+        throw new Error('API do backend indisponível. Configure VITE_API_URL para transferir leads.')
+      }
+
+      try {
+        console.log('[transferLeadOwner] calling backend transfer-owner', {
+          leadId,
+          newOwnerId,
+        })
+
+        const response = (await requestLeadsApi('/leads/transfer-owner', {
+          leadId,
+          newOwnerId,
+        })) as {
+          lead: LeadRecord
+        }
+
+        if (!response?.lead) {
+          throw new Error('Resposta do backend não contém o lead atualizado.')
+        }
+
+        console.log('[transferLeadOwner] backend returned lead', response.lead.id)
+        const updatedLead = response.lead
+        setLeads((current) => current.map((lead) => (lead.id === leadId ? updatedLead : lead)))
+        return updatedLead
+      } catch (err) {
+        console.error('[transferLeadOwner] erro geral:', err)
+        throw err
+      }
+    },
+    [apiBaseUrl, requestLeadsApi],
   )
 
   const leadsByStatus = useMemo(() => {
@@ -198,17 +319,18 @@ export const useLeadsKanban = () => {
   }, [leads])
 
   useEffect(() => {
-    if (!companyId) return
+    const fallbackOwnerId = !companyId ? userId : null
+    if (!companyId && !fallbackOwnerId) return
 
     const channel = supabase
-      .channel(`heart:leads_captura:${companyId}`)
+      .channel(`heart:leads_captura:${companyId ?? fallbackOwnerId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'heart',
           table: 'leads_captura',
-          filter: `company_id=eq.${companyId}`,
+          filter: companyId ? `company_id=eq.${companyId}` : `vendedor_responsavel=eq.${fallbackOwnerId}`,
         },
         (payload) => {
           if (payload.eventType === 'DELETE' && payload.old?.id) {
@@ -231,7 +353,7 @@ export const useLeadsKanban = () => {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [companyId])
+  }, [companyId, userId])
 
   return {
     leads,
@@ -242,5 +364,6 @@ export const useLeadsKanban = () => {
     updateLeadStatus,
     deleteLead,
     createLead,
+    transferLeadOwner,
   }
 }

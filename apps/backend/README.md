@@ -18,7 +18,6 @@ npm run start:dev
 |------|--------|-----------|-------------------------|
 | `/activity` | `POST` | Registra heartbeat/idle do usuário autenticado | `user-activity` |
 | `/geolocation/collect` | `POST` | Coleta IP e atualiza metadados no Supabase | `collect-user-geolocation` |
-| `/remarketing/dispatch` | `POST` | Dispara campanhas/broadcast para o provedor configurado | `remarketing-dispatch` |
 | `/contracts/upload-url` | `POST` | Gera URL/tokens para `uploadToSignedUrl` do Supabase Storage | `contract-template-upload-url` |
 | `/contracts/download-url` | `POST` | Cria URL de download temporária para o template | `contract-template-download-url` |
 | `/contracts/send` | `POST` | Envia o contrato para a Autentique (ou outro provedor) | `autentique-send-contract` |

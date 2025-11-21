@@ -14,7 +14,7 @@ type TemplateWithVars = ContractTemplate & { variables: ContractTemplateVariable
 
 export const ContractsPage = () => {
   const { hasRole } = useAuth()
-  const { templates, isLoading, error, saveTemplate, deleteTemplate } = useContractTemplatesAdmin()
+  const { templates, isLoading, error, saveTemplate, deleteTemplate, toggleTemplateStatus } = useContractTemplatesAdmin()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<TemplateWithVars | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -59,6 +59,22 @@ export const ContractsPage = () => {
 
     try {
       await deleteTemplate(template.id)
+      setActionError(null)
+    } catch (error) {
+      setActionError((error as Error).message)
+    }
+  }
+
+  const handleToggleStatus = async (template: TemplateWithVars) => {
+    const nextStatus = !template.ativo
+    const confirmation = nextStatus
+      ? window.confirm(`Deseja ativar o template "${template.nome}"?`)
+      : window.confirm(`Deseja desativar o template "${template.nome}"?`)
+
+    if (!confirmation) return
+
+    try {
+      await toggleTemplateStatus(template.id, nextStatus)
       setActionError(null)
     } catch (error) {
       setActionError((error as Error).message)
@@ -181,6 +197,7 @@ export const ContractsPage = () => {
         isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onToggleStatus={handleToggleStatus}
       />
 
       <ContractTemplateFormModal

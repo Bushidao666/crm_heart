@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatInTimeZone } from 'date-fns-tz'
 
 import { useCompany } from '@/app/providers/use-company'
+import { useAuth } from '@/features/auth/hooks/use-auth'
 import { heartSupabase, supabase } from '@/lib/supabase-client'
 import type { DealRecord, DealStatus } from '@/features/deals/types'
 
@@ -18,9 +19,10 @@ const initialState: DealsByStatus = {
 type FetchOpts = {
   searchTerm?: string
   dateRange?: { start: string | null; end: string | null }
+  ownerId?: string | null
 }
 
-const buildQuery = (companyId: string, { searchTerm, dateRange }: FetchOpts) => {
+const buildQuery = (companyId: string, { searchTerm, dateRange, ownerId }: FetchOpts) => {
   let query = heartSupabase
     .from('deals')
     .select('*')
@@ -42,6 +44,10 @@ const buildQuery = (companyId: string, { searchTerm, dateRange }: FetchOpts) => 
     query = query.lte('created_at', dateRange.end)
   }
 
+  if (ownerId) {
+    query = query.eq('vendedor_responsavel', ownerId)
+  }
+
   return query
 }
 
@@ -50,6 +56,7 @@ export const useDealsKanban = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { companyId, isLoading: isCompanyLoading, error: companyError } = useCompany()
+  const { user } = useAuth()
 
   const getBrazilTimestamp = useCallback(() => {
     return formatInTimeZone(new Date(), 'America/Sao_Paulo', "yyyy-MM-dd'T'HH:mm:ssXXX")
@@ -118,6 +125,11 @@ export const useDealsKanban = () => {
         throw new Error('Sua conta não está vinculada a nenhuma empresa.')
       }
 
+      const vendedorResponsavel = payload.vendedor_responsavel ?? user?.id ?? null
+      if (!vendedorResponsavel) {
+        throw new Error('Não foi possível identificar o vendedor responsável para criar o negócio.')
+      }
+
       const timestamp = getBrazilTimestamp()
       const insertPayload = {
         ...payload,
@@ -125,6 +137,7 @@ export const useDealsKanban = () => {
         deal_status: payload.deal_status ?? 'negocio_novo',
         created_at: payload.created_at ?? timestamp,
         updated_at: payload.updated_at ?? timestamp,
+        vendedor_responsavel: vendedorResponsavel,
       }
 
       const { data, error: insertError } = await heartSupabase
@@ -152,7 +165,7 @@ export const useDealsKanban = () => {
 
       return insertedDeal
     },
-    [companyId, getBrazilTimestamp],
+    [companyId, getBrazilTimestamp, user?.id],
   )
 
   const upsertDeal = useCallback(

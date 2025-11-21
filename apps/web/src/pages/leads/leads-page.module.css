@@ -260,3 +260,71 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+.transferDescription {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+.transferLeadHighlight {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.transferHint {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.transferField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.transferSelect {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 65%, transparent);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.95rem;
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+}
+
+.transferSelect:disabled {
+  opacity: 0.6;
+}
+
+.transferError {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #dc2626;
+}
+
+.transferConfirmButton {
+  appearance: none;
+  border: none;
+  background: var(--primary);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.transferConfirmButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 85%, black 5%);
+}
+
+.transferConfirmButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

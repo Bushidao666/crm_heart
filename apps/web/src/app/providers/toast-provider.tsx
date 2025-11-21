@@ -1,19 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import styles from './toast-provider.module.css'
-
-type ToastVariant = 'default' | 'success' | 'error'
-
-type ToastInput = {
-  title: string
-  description?: string
-  variant?: ToastVariant
-  duration?: number
-}
-
-type ToastItem = ToastInput & { id: string; variant: ToastVariant; expiresAt?: number | null }
-
-const ToastContext = createContext<((toast: ToastInput) => void) | null>(null)
+import { ToastContext, type ToastInput, type ToastItem } from './toast-context'
 
 const generateId = () => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -88,12 +76,4 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       </div>
     </ToastContext.Provider>
   )
-}
-
-export const useToast = () => {
-  const context = useContext(ToastContext)
-  if (!context) {
-    throw new Error('useToast deve ser utilizado dentro de um ToastProvider')
-  }
-  return context
 }

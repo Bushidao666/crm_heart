@@ -66,7 +66,7 @@ export class GeolocationService {
     const { data, error } = await this.supabase
       .schema(this.profileSchema)
       .from(this.profileTable)
-      .select('id, metadata')
+      .select('id, metadata, last_session')
       .eq('user_id', userId)
       .maybeSingle()
 
@@ -81,8 +81,9 @@ export class GeolocationService {
     }
 
     const existingMetadata = (data.metadata as Record<string, unknown> | null) ?? {}
-    const nextMetadata = {
-      ...existingMetadata,
+    const existingSession = (data.last_session as Record<string, unknown> | null) ?? {}
+    const nextSession = {
+      ...existingSession,
       ip_address: ipAddress,
       geolocation,
       last_geolocation_at: new Date().toISOString(),
@@ -93,7 +94,8 @@ export class GeolocationService {
       .schema(this.profileSchema)
       .from(this.profileTable)
       .update({
-        metadata: nextMetadata,
+        metadata: existingMetadata,
+        last_session: nextSession,
         updated_at: new Date().toISOString(),
       })
       .eq('id', data.id)

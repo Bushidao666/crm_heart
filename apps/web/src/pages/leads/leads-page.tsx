@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd'
-
 import { useAuth } from '@/features/auth/hooks/use-auth'
+import { useCompany } from '@/app/providers/use-company'
 import { useLeadsKanban } from '@/features/leads/hooks/use-leads-kanban'
 import { LeadFilters } from '@/features/leads/components/lead-filters'
 import { LeadsColumn } from '@/features/leads/components/leads-column'
@@ -12,6 +12,8 @@ import { LEAD_STATUS_LABELS, type DiscardReason, type LeadRecord, type LeadStatu
 import { KANBAN_PAGE_SIZE } from '@/constants/kanban'
 import { LEAD_DISCARD_STORAGE_KEY, LEAD_DISCARD_DRAFT_PREFIX } from '@/features/leads/constants'
 import { ADMIN_ROLES } from '@/features/auth/constants'
+import { heartSupabase } from '@/lib/supabase-client'
+import type { TeamMember } from '@/features/team/types'
 
 import styles from './leads-page.module.css'
 
@@ -50,7 +52,17 @@ const getLeadDisplayName = (lead: LeadRecord) => {
 export const LeadsPage = () => {
   const { hasRole } = useAuth()
   const isAdmin = hasRole(ADMIN_ROLES)
-  const { leadsByStatus, fetchLeads, updateLeadStatus, deleteLead, createLead, isLoading, error } = useLeadsKanban()
+  const {
+    leadsByStatus,
+    fetchLeads,
+    updateLeadStatus,
+    deleteLead,
+    createLead,
+    transferLeadOwner,
+    isLoading,
+    error,
+  } = useLeadsKanban()
+  const { companyId } = useCompany()
   const [searchTerm, setSearchTerm] = useState('')
   const [activePreset, setActivePreset] = useState<DateFilterPreset>('all')
   const [customRange, setCustomRange] = useState<{ start?: string | null; end?: string | null }>({})
@@ -60,6 +72,15 @@ export const LeadsPage = () => {
   const [leadPendingDeletion, setLeadPendingDeletion] = useState<LeadRecord | null>(null)
   const [isDeletingLead, setIsDeletingLead] = useState(false)
   const [isCreateLeadModalOpen, setIsCreateLeadModalOpen] = useState(false)
+  const [transferModalLead, setTransferModalLead] = useState<LeadRecord | null>(null)
+  const [assignableSellers, setAssignableSellers] = useState<TeamMember[]>([])
+  const [selectedTransferSeller, setSelectedTransferSeller] = useState('')
+  const [isTransferLoading, setIsTransferLoading] = useState(false)
+  const [isLoadingSellers, setIsLoadingSellers] = useState(false)
+  const [transferError, setTransferError] = useState<string | null>(null)
+  const [leadOwnersMap, setLeadOwnersMap] = useState<Record<string, string>>({})
+  const [sellerFilterOptions, setSellerFilterOptions] = useState<{ value: string; label: string }[]>([])
+  const [selectedSellerFilter, setSelectedSellerFilter] = useState('')
 
   const clampPosition = useCallback((coords: { x: number; y: number }) => {
     if (typeof window === 'undefined') return coords
@@ -91,9 +112,11 @@ export const LeadsPage = () => {
     }
   }, [])
 
+  const activeOwnerFilter = isAdmin ? selectedSellerFilter || null : undefined
+
   useEffect(() => {
-    void fetchLeads()
-  }, [fetchLeads])
+    void fetchLeads({ ownerId: activeOwnerFilter })
+  }, [activeOwnerFilter, fetchLeads])
 
   const handlePresetChange = (value: DateFilterPreset) => {
     setActivePreset(value)
@@ -105,7 +128,7 @@ export const LeadsPage = () => {
     setColumnPages(createInitialPages())
     setCustomRange({})
     const range = getDateRangeForPreset(value)
-    void fetchLeads({ searchTerm, startDate: range.start ?? undefined, endDate: range.end ?? undefined })
+    void fetchLeads({ searchTerm, startDate: range.start ?? undefined, endDate: range.end ?? undefined, ownerId: activeOwnerFilter })
   }
 
   useEffect(() => {
@@ -119,11 +142,11 @@ export const LeadsPage = () => {
           : getDateRangeForPreset(activePreset)
 
       setColumnPages(createInitialPages())
-      void fetchLeads({ searchTerm, startDate: range.start ?? undefined, endDate: range.end ?? undefined })
+      void fetchLeads({ searchTerm, startDate: range.start ?? undefined, endDate: range.end ?? undefined, ownerId: activeOwnerFilter })
     }, 300)
 
     return () => clearTimeout(handler)
-  }, [searchTerm, activePreset, customRange.start, customRange.end, fetchLeads])
+  }, [searchTerm, activePreset, customRange.start, customRange.end, fetchLeads, activeOwnerFilter])
 
   useEffect(() => {
     setColumnPages((previous) => {
@@ -228,10 +251,113 @@ export const LeadsPage = () => {
     [clampPosition],
   )
 
+  const handleOpenTransferModal = useCallback(
+    (lead: LeadRecord) => {
+      if (!isAdmin) return
+      setContextMenu(null)
+      setTransferError(null)
+      setTransferModalLead(lead)
+      setSelectedTransferSeller(lead.vendedor_responsavel ?? '')
+    },
+    [isAdmin],
+  )
+
   const availableStatuses = useMemo(() => {
     if (!contextMenu) return []
     return COLUMNS.filter((status) => status !== contextMenu.lead.lead_status)
   }, [contextMenu])
+
+  useEffect(() => {
+    if (!transferModalLead?.company_id) {
+      setAssignableSellers([])
+      return
+    }
+
+    let isMounted = true
+    setIsLoadingSellers(true)
+    setTransferError(null)
+
+    heartSupabase
+      .from('crm_user_profiles')
+      .select('id, user_id, user_name, user_email, role, status')
+      .eq('company_id', transferModalLead.company_id)
+      .eq('role', 'vendedor')
+      .not('status', 'eq', 'removed')
+      .order('user_name', { ascending: true, nullsFirst: false })
+      .then(({ data, error }) => {
+        if (!isMounted) return
+        if (error) {
+          console.error('Failed to load assignable sellers', error)
+          setAssignableSellers([])
+          setTransferError('Não foi possível carregar os vendedores disponíveis.')
+          return
+        }
+        setAssignableSellers(data ?? [])
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingSellers(false)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [transferModalLead])
+
+  useEffect(() => {
+    if (!isAdmin || !companyId) {
+      setLeadOwnersMap({})
+      setSellerFilterOptions([])
+      return
+    }
+
+    let isMounted = true
+    heartSupabase
+      .from('crm_user_profiles')
+      .select('id, user_id, user_name, user_email')
+      .eq('company_id', companyId)
+      .eq('role', 'vendedor')
+      .then(({ data, error }) => {
+        if (!isMounted) return
+        if (error) {
+          console.error('Failed to load lead owners map', error)
+          setLeadOwnersMap({})
+          return
+        }
+
+        const map: Record<string, string> = {}
+        const options: { value: string; label: string }[] = []
+
+        data?.forEach((member) => {
+          const key = member.user_id ?? member.id
+          if (key) {
+            const label = member.user_name ?? member.user_email ?? key
+            map[key] = label
+            options.push({ value: key, label })
+          }
+        })
+
+        setLeadOwnersMap(map)
+        setSellerFilterOptions(options)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [companyId, isAdmin])
+
+  useEffect(() => {
+    if (!isAdmin) {
+      setSelectedSellerFilter('')
+      return
+    }
+
+    const hasOption = sellerFilterOptions.some((option) => option.value === selectedSellerFilter)
+    if (!hasOption) {
+      setSelectedSellerFilter('')
+    }
+  }, [isAdmin, sellerFilterOptions, selectedSellerFilter])
 
   const handleContextMenuMove = useCallback(
     async (status: LeadStatus) => {
@@ -257,6 +383,60 @@ export const LeadsPage = () => {
     [contextMenu, openDiscardModal, updateLeadStatus],
   )
 
+  const closeTransferModal = useCallback(() => {
+    if (isTransferLoading) return
+    setTransferModalLead(null)
+    setAssignableSellers([])
+    setSelectedTransferSeller('')
+    setTransferError(null)
+  }, [isTransferLoading])
+
+  useEffect(() => {
+    if (!transferModalLead) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeTransferModal()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [closeTransferModal, transferModalLead])
+
+  const handleTransferLeadOwner = useCallback(async () => {
+    if (!transferModalLead) return
+
+    if (!selectedTransferSeller) {
+      setTransferError('Selecione um vendedor para receber o lead.')
+      return
+    }
+
+    if (selectedTransferSeller === transferModalLead.vendedor_responsavel) {
+      setTransferError('Selecione um vendedor diferente do atual.')
+      return
+    }
+
+    setIsTransferLoading(true)
+    setTransferError(null)
+
+    try {
+      await transferLeadOwner(
+        transferModalLead.id,
+        transferModalLead.company_id ?? null,
+        selectedTransferSeller,
+      )
+      closeTransferModal()
+    } catch (error) {
+      console.error(error)
+      setTransferError(
+        error instanceof Error ? error.message : 'Não foi possível transferir o responsável do lead.',
+      )
+    } finally {
+      setIsTransferLoading(false)
+    }
+  }, [closeTransferModal, selectedTransferSeller, transferLeadOwner, transferModalLead])
+
   const requestLeadDeletion = useCallback(
     (lead: LeadRecord) => {
       if (!isAdmin) return
@@ -269,6 +449,20 @@ export const LeadsPage = () => {
   const leadPendingDeletionName = useMemo(
     () => (leadPendingDeletion ? getLeadDisplayName(leadPendingDeletion) : ''),
     [leadPendingDeletion],
+  )
+
+  const transferLeadName = useMemo(
+    () => (transferModalLead ? getLeadDisplayName(transferModalLead) : ''),
+    [transferModalLead],
+  )
+
+  const renderLeadOwnerLabel = useCallback(
+    (lead: LeadRecord) => {
+      if (!isAdmin) return null
+      if (!lead.vendedor_responsavel) return null
+      return leadOwnersMap[lead.vendedor_responsavel] ?? null
+    },
+    [isAdmin, leadOwnersMap],
   )
 
   const handleCancelDeleteLead = useCallback(() => {
@@ -360,12 +554,8 @@ export const LeadsPage = () => {
 
   const handleCreateLeadSubmit = useCallback(
     async (payload: { firstName: string; lastName?: string; email?: string; phone?: string }) => {
-      try {
-        await createLead(payload)
-        setIsCreateLeadModalOpen(false)
-      } catch (creationError) {
-        throw creationError
-      }
+      await createLead(payload)
+      setIsCreateLeadModalOpen(false)
     },
     [createLead],
   )
@@ -396,6 +586,9 @@ export const LeadsPage = () => {
           setActivePreset('custom')
           setCustomRange((prev) => ({ ...prev, [key]: value || null }))
         }}
+        ownerOptions={isAdmin ? sellerFilterOptions : undefined}
+        ownerValue={selectedSellerFilter}
+        onOwnerChange={isAdmin ? setSelectedSellerFilter : undefined}
       />
 
       {error ? <p className={styles.error}>{error}</p> : null}
@@ -428,6 +621,7 @@ export const LeadsPage = () => {
               }
               onLeadContextMenu={handleLeadContextMenu}
               highlight={highlightedTerm}
+              renderOwnerLabel={renderLeadOwnerLabel}
             />
           ))}
         </div>
@@ -458,6 +652,18 @@ export const LeadsPage = () => {
                 }}
               >
                 Excluir
+              </button>
+            ) : null}
+            {isAdmin ? (
+              <button
+                type="button"
+                className={styles.contextMenuAction}
+                onClick={() => {
+                  if (!contextMenu) return
+                  handleOpenTransferModal(contextMenu.lead)
+                }}
+              >
+                Transferir responsável
               </button>
             ) : null}
             <button
@@ -524,6 +730,80 @@ export const LeadsPage = () => {
                 disabled={isDeletingLead}
               >
                 {isDeletingLead ? 'Excluindo…' : 'Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isAdmin && transferModalLead ? (
+        <div
+          className={styles.confirmOverlay}
+          role="dialog"
+          aria-modal="true"
+          onClick={closeTransferModal}
+        >
+          <div
+            className={styles.confirmContent}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className={styles.confirmTitle}>Transferir responsável</h2>
+            <p className={styles.transferDescription}>
+              Escolha o novo responsável pelo lead{' '}
+              <span className={styles.transferLeadHighlight}>{transferLeadName || 'selecionado'}</span>.
+            </p>
+
+            {isLoadingSellers ? (
+              <p className={styles.transferHint}>Carregando vendedores disponíveis...</p>
+            ) : null}
+
+            {!isLoadingSellers && assignableSellers.length === 0 ? (
+              <p className={styles.transferHint}>Nenhum vendedor disponível para a transferência.</p>
+            ) : null}
+
+            {assignableSellers.length > 0 ? (
+              <label className={styles.transferField}>
+                <span>Novo vendedor responsável</span>
+                <select
+                  className={styles.transferSelect}
+                  value={selectedTransferSeller}
+                  onChange={(event) => setSelectedTransferSeller(event.target.value)}
+                  disabled={isTransferLoading}
+                >
+                  <option value="">Selecione um vendedor</option>
+                  {assignableSellers.map((member) => (
+                    <option
+                      key={member.id}
+                      value={member.user_id ?? member.id}
+                      disabled={!member.user_id}
+                    >
+                      {member.user_name ?? member.user_email} — {member.user_email}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+
+            {transferError ? <p className={styles.transferError}>{transferError}</p> : null}
+
+            <div className={styles.confirmActions}>
+              <button
+                type="button"
+                className={styles.confirmCancelButton}
+                onClick={closeTransferModal}
+                disabled={isTransferLoading}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles.transferConfirmButton}
+                onClick={() => void handleTransferLeadOwner()}
+                disabled={
+                  isTransferLoading || isLoadingSellers || assignableSellers.length === 0
+                }
+              >
+                {isTransferLoading ? 'Transferindo…' : 'Transferir'}
               </button>
             </div>
           </div>

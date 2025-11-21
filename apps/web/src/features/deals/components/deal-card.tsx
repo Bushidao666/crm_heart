@@ -28,7 +28,13 @@ type Attachment = {
   path: string
 }
 
-export const DealCard = ({ deal, onClick }: { deal: DealRecord; onClick?: (deal: DealRecord) => void }) => {
+type DealCardProps = {
+  deal: DealRecord
+  onClick?: (deal: DealRecord) => void
+  ownerLabel?: string | null
+}
+
+export const DealCard = ({ deal, onClick, ownerLabel }: DealCardProps) => {
   const firstInstallmentDate = deal.deal_primeira_parcela ?? deal.data_primeira_parcela
   const [contractStatus, setContractStatus] = useState<string | null>(null)
   const [contractStatusLoading, setContractStatusLoading] = useState(false)
@@ -194,7 +200,10 @@ export const DealCard = ({ deal, onClick }: { deal: DealRecord; onClick?: (deal:
   return (
     <article className={styles.card} onClick={handleCardClick}>
       <header className={styles.header}>
-        <h3 className={styles.title}>{deal.deal_full_name ?? 'Nome não informado'}</h3>
+        <div className={styles.titleGroup}>
+          <h3 className={styles.title}>{deal.deal_full_name ?? 'Nome não informado'}</h3>
+          {ownerLabel ? <span className={styles.ownerBadge}>{ownerLabel}</span> : null}
+        </div>
         <div className={styles.meta}>
           <span className={styles.createdAt}>Criado em {formatDateTime(deal.created_at)}</span>
           <span className={styles.updatedAt}>Atualizado em {formatDateTime(deal.updated_at)}</span>

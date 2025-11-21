@@ -20,6 +20,9 @@ type DealFiltersProps = {
   onPresetChange: (value: DateFilterPreset) => void
   customRange: { start: string | null; end: string | null }
   onCustomRangeChange: (key: 'start' | 'end', value: string) => void
+  ownerOptions?: { value: string; label: string }[]
+  ownerValue?: string
+  onOwnerChange?: (value: string) => void
 }
 
 export const DealFilters = ({
@@ -29,6 +32,9 @@ export const DealFilters = ({
   onPresetChange,
   customRange,
   onCustomRangeChange,
+  ownerOptions,
+  ownerValue = '',
+  onOwnerChange,
 }: DealFiltersProps) => {
   const showCustomDates = useMemo(() => activePreset === 'custom', [activePreset])
 
@@ -70,6 +76,27 @@ export const DealFilters = ({
           Personalizado
         </button>
       </div>
+
+      {ownerOptions && onOwnerChange ? (
+        <div className={styles.ownerFilter}>
+          <label className={styles.label} htmlFor="deal-owner">
+            Vendedor responsável
+          </label>
+          <select
+            id="deal-owner"
+            className={styles.select}
+            value={ownerValue}
+            onChange={(event) => onOwnerChange(event.target.value)}
+          >
+            <option value="">Todos</option>
+            {ownerOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       {showCustomDates ? (
         <div className={styles.customDates}>

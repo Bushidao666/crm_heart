@@ -9,10 +9,11 @@ type ContractTemplatesTableProps = {
   templates: ContractTemplateWithVariables[]
   onEdit: (template: ContractTemplateWithVariables) => void
   onDelete: (template: ContractTemplateWithVariables) => void
+  onToggleStatus: (template: ContractTemplateWithVariables) => void
   isLoading: boolean
 }
 
-export const ContractTemplatesTable = ({ templates, onEdit, onDelete, isLoading }: ContractTemplatesTableProps) => (
+export const ContractTemplatesTable = ({ templates, onEdit, onDelete, onToggleStatus, isLoading }: ContractTemplatesTableProps) => (
   <div className={styles.wrapper}>
     <table className={styles.table}>
       <thead>
@@ -40,14 +41,17 @@ export const ContractTemplatesTable = ({ templates, onEdit, onDelete, isLoading 
             <td>{template.nome}</td>
             <td>{template.descricao ?? '—'}</td>
             <td>{formatVariables(template.variables)}</td>
-            <td>{template.ativo ? 'Ativo' : 'Inativo'}</td>
-            <td>
-              <div className={styles.actions}>
-                <button type="button" className={styles.editButton} onClick={() => onEdit(template)}>
-                  Editar
-                </button>
-                <button type="button" className={styles.deleteButton} onClick={() => onDelete(template)}>
-                  Excluir
+              <td>{template.ativo ? 'Ativo' : 'Inativo'}</td>
+              <td>
+                <div className={styles.actions}>
+                  <button type="button" className={template.ativo ? styles.deactivateButton : styles.activateButton} onClick={() => onToggleStatus(template)}>
+                    {template.ativo ? 'Desativar' : 'Ativar'}
+                  </button>
+                  <button type="button" className={styles.editButton} onClick={() => onEdit(template)}>
+                    Editar
+                  </button>
+                  <button type="button" className={styles.deleteButton} onClick={() => onDelete(template)}>
+                    Excluir
                 </button>
               </div>
             </td>

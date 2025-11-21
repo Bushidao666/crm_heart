@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 
 import { useAuth } from '@/features/auth/hooks/use-auth'
+import { METRICS_ROLES } from '@/features/auth/constants'
 import type { UserRole } from '@/features/auth/types'
 
 import styles from './sidebar.module.css'
@@ -22,7 +23,7 @@ const adminNavigationItems: NavigationItem[] = [
   { path: '/contracts/templates', label: 'Templates de contrato', roles: ['admin'] },
   { path: '/services', label: 'Serviços', roles: ['admin'] },
   { path: '/team', label: 'Equipe', roles: ['admin'] },
-  { path: '/metrics', label: 'Métricas', roles: ['admin'] },
+  { path: '/metrics', label: 'Métricas', roles: METRICS_ROLES },
 ]
 
 export const Sidebar = () => {

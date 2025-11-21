@@ -18,6 +18,27 @@ type EnforceAccessRevocationHandler = (
   detail?: AccessRevokedEventDetail,
 ) => Promise<void> | void
 
+type TeamMemberRow = {
+  id: string
+  user_id: string | null
+  company_id: string | null
+  user_name: string | null
+  user_email: string | null
+  role: string | null
+  status: string | null
+  last_activity: string | null
+  metadata: {
+    ip_address?: string | null
+    geolocation?: Record<string, unknown> | null
+  } | null
+  last_session: Record<string, unknown> | null
+  created_at: string | null
+  updated_at: string | null
+}
+
+const selectColumns =
+  'id, user_id, company_id, user_name, user_email, role, status, last_activity, metadata, last_session, created_at, updated_at'
+
 const parseSchemaPriority = (): CompanySchema[] => {
   const value = env.profileSchemaPriority?.trim()
   const fallback: CompanySchema[] = ['heart', 'core']
@@ -217,40 +238,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const sessionUserId = session.user.id
 
     try {
-      type TeamMemberRow = {
-        id: string
-        user_id: string | null
-        company_id: string | null
-        user_name: string | null
-        user_email: string | null
-        role: string | null
-        status: string | null
-        last_activity: string | null
-        metadata: {
-          ip_address?: string | null
-          geolocation?: Record<string, unknown> | null
-        } | null
-        created_at: string | null
-        updated_at: string | null
-      }
-
-      const selectColumns =
-        'id, user_id, company_id, user_name, user_email, role, status, last_activity, metadata, created_at, updated_at'
 
       const mapProfile = (row: TeamMemberRow, schema: CompanySchema): UserProfile => {
         const metadata = row.metadata ?? {}
+        const lastSession = (row.last_session as Record<string, unknown> | null) ?? null
+        const sessionIp = (lastSession?.ip_address as string | null) ?? (metadata.ip_address as string | null) ?? null
+        const sessionGeo =
+          (lastSession?.geolocation as Record<string, unknown> | null) ??
+          (metadata.geolocation as Record<string, unknown> | null) ??
+          null
         return {
           id: row.id,
           company_id: row.company_id ?? null,
           user_name: row.user_name ?? null,
           user_email: row.user_email ?? session.user?.email ?? '',
           role: (row.role as UserRole | null) ?? null,
+          last_session: lastSession,
+          ip_address: sessionIp,
+          geolocation: sessionGeo,
           status: row.status ?? null,
           last_activity: row.last_activity ?? null,
           created_at: row.created_at ?? null,
           updated_at: row.updated_at ?? null,
-          ip_address: (metadata.ip_address as string | null) ?? null,
-          geolocation: (metadata.geolocation as Record<string, unknown> | null) ?? null,
           schema,
         }
       }
@@ -258,6 +267,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const schemaClients = profileSchemaPriority.map((schema) => ({
         name: schema,
         client: schema === 'heart' ? heartSupabase : coreSupabase,
+        table: schema === 'heart' ? 'crm_user_profiles' : 'equipe',
+        schema,
       }))
 
       let profileFound: UserProfile | null = null
@@ -269,7 +280,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const { data, error, status } = await schemaClient.client
-          .from('equipe')
+          .from(schemaClient.table)
           .select(selectColumns)
           .or(`id.eq.${sessionUserId},user_id.eq.${sessionUserId}`)
           .maybeSingle<TeamMemberRow>()
@@ -292,7 +303,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         if (data) {
-          profileFound = mapProfile(data, schemaClient.name)
+          profileFound = mapProfile(data, schemaClient.schema)
           break
         }
       }
@@ -455,7 +466,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (profile) {
       void collectGeolocation()
     }
-  }, [profile, session?.user, loadProfile])
+  }, [profile, session?.user, session?.access_token, loadProfile])
 
   const value = useMemo<AuthContextValue>(
     () => ({

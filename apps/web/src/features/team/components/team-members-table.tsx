@@ -17,7 +17,9 @@ const formatRelativeTime = (timestamp: string | null) => {
 }
 
 const getGeolocationSummary = (member: TeamMember) => {
-  const geolocation = (member.metadata?.geolocation as Record<string, string> | undefined) ?? null
+  const sessionGeo = (member.last_session?.geolocation as Record<string, string> | undefined) ?? null
+  const fallbackGeo = (member.metadata?.geolocation as Record<string, string> | undefined) ?? null
+  const geolocation = sessionGeo ?? fallbackGeo
   if (!geolocation) return '—'
 
   const { city, region, country_name: countryName } = geolocation

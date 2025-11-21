@@ -15,6 +15,7 @@ type DealsColumnProps = {
   onPageChange: (page: number) => void
   onCardClick?: (deal: DealRecord) => void
   onDealContextMenu?: (deal: DealRecord, position: { x: number; y: number }) => void
+  renderOwnerLabel?: (deal: DealRecord) => string | null
 }
 
 export const DealsColumn = ({
@@ -27,6 +28,7 @@ export const DealsColumn = ({
   onPageChange,
   onCardClick,
   onDealContextMenu,
+  renderOwnerLabel,
 }: DealsColumnProps) => {
   const handlePageChange = (page: number) => {
     if (page === currentPage) return
@@ -62,7 +64,11 @@ export const DealsColumn = ({
                       onDealContextMenu?.(deal, { x: event.clientX, y: event.clientY })
                     }}
                   >
-                    <DealCard deal={deal} onClick={onCardClick} />
+                    <DealCard
+                      deal={deal}
+                      onClick={onCardClick}
+                      ownerLabel={renderOwnerLabel?.(deal) ?? null}
+                    />
                   </div>
                 )}
               </Draggable>

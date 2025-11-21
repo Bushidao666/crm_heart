@@ -69,6 +69,21 @@
   gap: 1rem;
 }
 
+.ownerFilter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.select {
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--outline) 60%, transparent);
+  padding: 0 0.75rem;
+  background: var(--surface);
+  color: var(--foreground);
+}
+
 .dateInput {
   margin-top: 0.35rem;
   padding: 0.6rem 0.8rem;
